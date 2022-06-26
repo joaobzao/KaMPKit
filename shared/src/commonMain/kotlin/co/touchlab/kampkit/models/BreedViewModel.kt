@@ -79,6 +79,12 @@ class BreedViewModel(
         }
     }
 
+    fun deleteBreed(breed: Breed): Job {
+        return viewModelScope.launch {
+            breedRepository.deleteBreed(breed)
+        }
+    }
+
     private fun handleBreedError(throwable: Throwable) {
         log.e(throwable) { "Error downloading breed list" }
         mutableBreedState.update {

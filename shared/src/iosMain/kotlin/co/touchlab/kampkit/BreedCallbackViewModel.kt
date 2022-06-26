@@ -23,4 +23,8 @@ class BreedCallbackViewModel(
     fun updateBreedFavorite(breed: Breed) {
         viewModel.updateBreedFavorite(breed)
     }
+
+    fun deleteBreed(breed: Breed) {
+        viewModel.deleteBreed(breed)
+    }
 }

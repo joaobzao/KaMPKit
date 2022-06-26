@@ -34,6 +34,13 @@ class DatabaseHelper(
         }
     }
 
+    suspend fun deleteBreed(id: Long) {
+        log.d { "Deleting breed with id=$id from database" }
+        dbRef.transactionWithContext(backgroundDispatcher) {
+            dbRef.tableQueries.deleteBreed(id)
+        }
+    }
+
     fun selectById(id: Long): Flow<List<Breed>> =
         dbRef.tableQueries
             .selectById(id)

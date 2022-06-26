@@ -72,8 +72,35 @@ class SqlDelightTest {
         dbHelper.deleteAll()
 
         assertTrue(
-            dbHelper.selectAllItems().first().count() == 0,
+            dbHelper.selectAllItems().first().isEmpty(),
             "Delete All did not work"
+        )
+    }
+
+    @Test
+    fun `Delete Breed Success`() = runTest {
+        // GIVEN
+
+        val breeds = dbHelper.selectAllItems().first()
+        // Could instead just check if the list was not empty and after deleting check
+        // if the list is empty but I prefer to be more descriptive and dumb in UTs. That assumption
+        // could be bad if someone messes with the number of items globally defined for tests,
+        // currently we are just inserting the beagle breed into the db for testing but in the
+        // future someone might change that for some reason and that can have a bad side effect
+        // in this test.
+        val beagleBreed = breeds.first { it.name == "Beagle" }
+        assertTrue(dbHelper.selectAllItems().first().first().name == "Beagle")
+
+        // WHEN
+
+        dbHelper.deleteBreed(beagleBreed.id)
+        val newBreeds = dbHelper.selectAllItems().first()
+
+        // THEN
+
+        assertTrue(
+            newBreeds.none { it.name == "Beagle" },
+            ""
         )
     }
 }

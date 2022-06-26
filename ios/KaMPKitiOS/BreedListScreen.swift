@@ -63,7 +63,7 @@ class ObservableBreedModel: ObservableObject {
 }
 
 struct BreedListScreen: View {
-    @ObservedObject
+    @StateObject
     var observableModel = ObservableBreedModel()
 
     var body: some View {
@@ -123,7 +123,7 @@ struct BreedRowView: View {
                 Text(breed.name)
                     .padding(4.0)
                 Spacer()
-                Image(systemName: (!breed.favorite) ? "heart" : "heart.fill")
+                Image(systemName: !breed.favorite ? "heart" : "heart.fill")
                     .padding(4.0)
             }
         }

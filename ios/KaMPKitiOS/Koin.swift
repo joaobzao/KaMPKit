@@ -29,10 +29,27 @@ func startKoin() {
 }
 
 private var _koin: Koin_coreKoin?
+
+// @AssertAccess | Error: Property wrappers are not yet supported in top-level code
 var koin: Koin_coreKoin {
+    assert(_koin != nil, "")
     return _koin!
 }
 
 class IosAppInfo: AppInfo {
     let appId: String = Bundle.main.bundleIdentifier!
+}
+
+@propertyWrapper
+struct AssertAccess<T: AnyObject> {
+    private var _wrappedValue: T?
+    var wrappedValue: T {
+        get {
+            assert(_wrappedValue != nil, "Make sure you have an instance before trying to access it")
+            return _wrappedValue!
+        }
+        set {
+            _wrappedValue = newValue
+        }
+    }
 }

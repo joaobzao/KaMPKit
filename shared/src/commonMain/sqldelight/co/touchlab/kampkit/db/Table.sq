@@ -17,6 +17,9 @@ insertBreed:
 INSERT OR IGNORE INTO Breed(name)
 VALUES (?);
 
+deleteBreed:
+DELETE FROM Breed WHERE id = ?;
+
 deleteAll:
 DELETE FROM Breed;
 

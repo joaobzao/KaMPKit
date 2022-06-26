@@ -27,7 +27,7 @@ func doPublish<T>(_ flowAdapter: FlowAdapter<T>, onEach: @escaping (T) -> Void) 
         .sink { onEach($0) }
 }
 
-/// Wraps a `KotlinThrowable` in a `LocalizedError` which can be used as  a Combine error type
+/// Wraps a `KotlinThrowable` in a `LocalizedError` which can be used as a Combine error type
 class KotlinError: LocalizedError {
     let throwable: KotlinThrowable
 

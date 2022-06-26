@@ -51,6 +51,10 @@ class BreedRepository(
         dbHelper.updateFavorite(breed.id, !breed.favorite)
     }
 
+    suspend fun deleteBreed(breed: Breed) {
+        dbHelper.deleteBreed(breed.id)
+    }
+
     private fun isBreedListStale(): Boolean {
         val lastDownloadTimeMS = settings.getLong(DB_TIMESTAMP_KEY, 0)
         val oneHourMS = 60 * 60 * 1000
