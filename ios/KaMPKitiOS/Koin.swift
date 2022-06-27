@@ -32,7 +32,7 @@ private var _koin: Koin_coreKoin?
 
 // @AssertAccess | Error: Property wrappers are not yet supported in top-level code
 var koin: Koin_coreKoin {
-    assert(_koin != nil, "")
+    assert(_koin != nil, "Make sure to call `startKoin()` before trying to access koin instance.")
     return _koin!
 }
 

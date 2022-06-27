@@ -30,9 +30,18 @@ class ObservableBreedModel: ObservableObject {
         let viewModel = KotlinDependencies.shared.getBreedViewModel()
 
         doPublish(viewModel.breeds) { [weak self] dogsState in
-            self?.loading = dogsState.isLoading
-            self?.breeds = dogsState.breeds
-            self?.error = dogsState.error
+            // In swift 5.7 we could make it like:
+            // ```
+            // guard let self else {
+            //     return assertionFailure("👻 ObservableBreedModel instance no longer exists")
+            // }
+            // ```
+            guard let `self` = self else {
+                return assertionFailure("👻 ObservableBreedModel instance no longer exists")
+            }
+            self.loading = dogsState.isLoading
+            self.breeds = dogsState.breeds
+            self.error = dogsState.error
 
             if let breeds = dogsState.breeds {
                 log.d(message: {"View updating with \(breeds.count) breeds"})
@@ -56,6 +65,10 @@ class ObservableBreedModel: ObservableObject {
     func onBreedFavorite(_ breed: Breed) {
         viewModel?.updateBreedFavorite(breed: breed)
     }
+    
+    func onBreedDelete(_ breed: Breed) {
+        viewModel?.deleteBreed(breed: breed)
+    }
 
     func refresh() {
         viewModel?.refreshBreeds()
@@ -72,6 +85,7 @@ struct BreedListScreen: View {
             breeds: observableModel.breeds,
             error: observableModel.error,
             onBreedFavorite: { observableModel.onBreedFavorite($0) },
+            onBreedDelete: { observableModel.onBreedDelete($0) },
             refresh: { observableModel.refresh() }
         )
         .onAppear(perform: {
@@ -88,16 +102,20 @@ struct BreedListContent: View {
     var breeds: [Breed]?
     var error: String?
     var onBreedFavorite: (Breed) -> Void
+    var onBreedDelete: (Breed) -> Void
     var refresh: () -> Void
 
     var body: some View {
         ZStack {
             VStack {
                 if let breeds = breeds {
-                    List(breeds, id: \.id) { breed in
-                        BreedRowView(breed: breed) {
-                            onBreedFavorite(breed)
+                    List {
+                        ForEach(breeds, id: \.id) { breed in
+                            BreedRowView(breed: breed) {
+                                onBreedFavorite(breed)
+                            }
                         }
+                        .onDelete(perform: delete(at:))
                     }
                 }
                 if let error = error {
@@ -110,6 +128,16 @@ struct BreedListContent: View {
             }
             if loading { Text("Loading...") }
         }
+    }
+    
+    func delete(at offsets: IndexSet) {
+        let index: Int = offsets[offsets.startIndex]
+        guard let breed = breeds?[index]
+        else {
+            return assertionFailure("👻 trying to delete an item that does not exist.")
+        }
+
+        onBreedDelete(breed)
     }
 }
 
@@ -140,6 +168,7 @@ struct BreedListScreen_Previews: PreviewProvider {
             ],
             error: nil,
             onBreedFavorite: { _ in },
+            onBreedDelete: { _ in },
             refresh: {}
         )
     }
