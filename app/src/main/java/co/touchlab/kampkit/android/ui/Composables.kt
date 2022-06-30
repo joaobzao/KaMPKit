@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -58,7 +60,8 @@ fun MainScreen(
         onRefresh = { viewModel.refreshBreeds() },
         onSuccess = { data -> log.v { "View updating with ${data.size} breeds" } },
         onError = { exception -> log.e { "Displaying error: $exception" } },
-        onFavorite = { viewModel.updateBreedFavorite(it) }
+        onFavorite = { viewModel.updateBreedFavorite(it) },
+        onDelete = { viewModel.deleteBreed(it) }
     )
 }
 
@@ -68,7 +71,8 @@ fun MainScreenContent(
     onRefresh: () -> Unit = {},
     onSuccess: (List<Breed>) -> Unit = {},
     onError: (String) -> Unit = {},
-    onFavorite: (Breed) -> Unit = {}
+    onFavorite: (Breed) -> Unit = {},
+    onDelete: (Breed) -> Unit = {}
 ) {
     Surface(
         color = MaterialTheme.colors.background,
@@ -86,7 +90,7 @@ fun MainScreenContent(
                 LaunchedEffect(breeds) {
                     onSuccess(breeds)
                 }
-                Success(successData = breeds, favoriteBreed = onFavorite)
+                Success(successData = breeds, favoriteBreed = onFavorite, deleteBreed = onDelete)
             }
             val error = dogsState.error
             if (error != null) {
@@ -128,28 +132,41 @@ fun Error(error: String) {
 @Composable
 fun Success(
     successData: List<Breed>,
-    favoriteBreed: (Breed) -> Unit
+    favoriteBreed: (Breed) -> Unit,
+    deleteBreed: (Breed) -> Unit
 ) {
-    DogList(breeds = successData, favoriteBreed)
+    DogList(breeds = successData, favoriteBreed, deleteBreed)
 }
 
 @Composable
-fun DogList(breeds: List<Breed>, onItemClick: (Breed) -> Unit) {
+fun DogList(
+    breeds: List<Breed>,
+    onItemClick: (Breed) -> Unit,
+    onItemLongClick: (Breed) -> Unit
+) {
     LazyColumn {
         items(breeds) { breed ->
-            DogRow(breed) {
-                onItemClick(it)
-            }
+            DogRow(
+                breed = breed,
+                onClick = { onItemClick(it) },
+                onLongClick = { onItemLongClick(it) }
+            )
             Divider()
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DogRow(breed: Breed, onClick: (Breed) -> Unit) {
+fun DogRow(
+    breed: Breed,
+    onClick: (Breed) -> Unit,
+    onLongClick: (Breed) -> Unit
+) {
     Row(
         Modifier
             .clickable { onClick(breed) }
+            .combinedClickable(onClick = { onClick(breed) }, onLongClick = { onLongClick(breed) })
             .padding(10.dp)
     ) {
         Text(breed.name, Modifier.weight(1F))
